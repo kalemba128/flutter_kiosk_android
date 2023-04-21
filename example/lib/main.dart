@@ -16,35 +16,24 @@ class MyApp extends StatefulWidget {
 }
 
 class _MyAppState extends State<MyApp> {
-  String _platformVersion = 'Unknown';
+  bool? _isDeviceOwner;
+  List<String>? _blockedPackages;
+  bool? _isInKioskMode;
   final _flutterKioskAndroidPlugin = FlutterKioskAndroid();
 
   @override
   void initState() {
     super.initState();
-    initPlatformState();
+    _init();
   }
 
-  // Platform messages are asynchronous, so we initialize in an async method.
-  Future<void> initPlatformState() async {
-    String platformVersion;
-    // Platform messages may fail, so we use a try/catch PlatformException.
-    // We also handle the message potentially returning null.
+  Future<void> _init() async {
     try {
-      platformVersion =
-          await _flutterKioskAndroidPlugin.getPlatformVersion() ?? 'Unknown platform version';
-    } on PlatformException {
-      platformVersion = 'Failed to get platform version.';
-    }
+      _isDeviceOwner = await _flutterKioskAndroidPlugin.isDeviceOwner();
+    } on PlatformException {}
 
-    // If the widget was removed from the tree while the asynchronous platform
-    // message was in flight, we want to discard the reply rather than calling
-    // setState to update our non-existent appearance.
     if (!mounted) return;
-
-    setState(() {
-      _platformVersion = platformVersion;
-    });
+    setState(() {});
   }
 
   @override
@@ -55,8 +44,66 @@ class _MyAppState extends State<MyApp> {
           title: const Text('Plugin example app'),
         ),
         body: Center(
-          child: Text('Running on: $_platformVersion\n'),
-        ),
+            child: Column(
+          children: [
+            Text('isDeviceOwner: $_isDeviceOwner\n'),
+            ElevatedButton(
+              onPressed: () async {
+                try {
+                  final blocked = await _flutterKioskAndroidPlugin.blockApplications();
+                  _blockedPackages = blocked;
+                  setState(() {});
+                } on PlatformException {}
+              },
+              child: Text('Block apps'),
+            ),
+            ElevatedButton(
+              onPressed: _blockedPackages != null
+                  ? () async {
+                      try {
+                        await _flutterKioskAndroidPlugin.unblockApplications(packages: _blockedPackages);
+                        _blockedPackages = null;
+                        setState(() {});
+                      } on PlatformException {}
+                    }
+                  : null,
+              child: Text('Unblock apps'),
+            ),
+            if (_blockedPackages != null)
+              SizedBox(
+                height: 300,
+                child: ListView.builder(
+                  itemCount: _blockedPackages!.length,
+                  itemBuilder: (context, index) => Text(_blockedPackages![index]),
+                ),
+              ),
+            ElevatedButton(
+              onPressed: _isInKioskMode != true
+                  ? () async {
+                      try {
+                        await _flutterKioskAndroidPlugin.startKioskMode();
+                        _isInKioskMode = await _flutterKioskAndroidPlugin.isInKioskMode();
+                        setState(() {});
+                      } on PlatformException {}
+                    }
+                  : null,
+              child: Text('Start Kiosk'),
+            ),
+            ElevatedButton(
+              onPressed: _isInKioskMode == true
+                  ? () async {
+                      try {
+                        await _flutterKioskAndroidPlugin.stopKioskMode();
+                        _isInKioskMode = await _flutterKioskAndroidPlugin.isInKioskMode();
+                        setState(() {});
+                      } on PlatformException {}
+                    }
+                  : null,
+              child: Text('Stop Kiosk'),
+            ),
+            Text("KioskMode: ${_isInKioskMode}"),
+          ],
+        )),
       ),
     );
   }

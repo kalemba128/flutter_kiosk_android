@@ -44,4 +44,22 @@ class MethodChannelFlutterKioskAndroid extends FlutterKioskAndroidPlatform {
     final version = await methodChannel.invokeMethod<bool>('isInKioskMode');
     return version!;
   }
+
+  @override
+  Future<bool> disallowInstallingApplications() async {
+    final version = await methodChannel.invokeMethod<bool>('disallowInstallingApplications');
+    return version!;
+  }
+
+  @override
+  Future<bool> allowInstallingApplications()async {
+    final version = await methodChannel.invokeMethod<bool>('allowInstallingApplications');
+    return version!;
+  }
+
+  @override
+  Future<bool> isInstallingApplicationsAllowed() async{
+    final version = await methodChannel.invokeMethod<bool>('isInstallingApplicationsAllowed');
+    return version!;
+  }
 }

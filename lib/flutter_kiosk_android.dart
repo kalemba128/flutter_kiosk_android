@@ -24,4 +24,16 @@ class FlutterKioskAndroid {
   Future<bool> isInKioskMode() {
     return FlutterKioskAndroidPlatform.instance.isInKioskMode();
   }
+
+  Future<bool> disallowInstallingApplications() {
+    return FlutterKioskAndroidPlatform.instance.disallowInstallingApplications();
+  }
+
+  Future<bool> allowInstallingApplications() {
+    return FlutterKioskAndroidPlatform.instance.allowInstallingApplications();
+  }
+
+  Future<bool> isInstallingApplicationsAllowed() {
+    return FlutterKioskAndroidPlatform.instance.isInstallingApplicationsAllowed();
+  }
 }

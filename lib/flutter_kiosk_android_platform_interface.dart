@@ -46,4 +46,16 @@ abstract class FlutterKioskAndroidPlatform extends PlatformInterface {
   Future<bool> isInKioskMode() {
     throw UnimplementedError('isInKioskMode() has not been implemented.');
   }
+
+  Future<bool> disallowInstallingApplications() {
+    throw UnimplementedError('disallowInstallingApplications() has not been implemented.');
+  }
+
+  Future<bool> allowInstallingApplications() {
+    throw UnimplementedError('allowInstallingApplications() has not been implemented.');
+  }
+
+  Future<bool> isInstallingApplicationsAllowed() {
+    throw UnimplementedError('isInstallingApplicationsAllowed() has not been implemented.');
+  }
 }

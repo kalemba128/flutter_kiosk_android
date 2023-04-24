@@ -37,5 +37,5 @@
 ## Make app device owner
 
    ```
-   adb shell dpm set-device-owner com.example.app/com.kalemba128.flutter_kiosk_android.FlutterKioskAndroidPlugin
+   adb shell dpm set-device-owner com.kalemba128.flutter_kiosk_android_example/com.kalemba128.flutter_kiosk_android.FlutterKioskAndroidPlugin
    ```

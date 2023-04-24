@@ -19,6 +19,7 @@ class _MyAppState extends State<MyApp> {
   bool? _isDeviceOwner;
   List<String>? _blockedPackages;
   bool? _isInKioskMode;
+  bool? _isInstallingApplicationsAllowed;
   final _flutterKioskAndroidPlugin = FlutterKioskAndroid();
 
   @override
@@ -102,6 +103,27 @@ class _MyAppState extends State<MyApp> {
               child: Text('Stop Kiosk'),
             ),
             Text("KioskMode: ${_isInKioskMode}"),
+            ElevatedButton(
+              onPressed: () async {
+                try {
+                  await _flutterKioskAndroidPlugin.allowInstallingApplications();
+                  _isInstallingApplicationsAllowed = await _flutterKioskAndroidPlugin.isInstallingApplicationsAllowed();
+                  setState(() {});
+                } on PlatformException {}
+              },
+              child: Text( 'Allow installing applications'),
+            ),
+            ElevatedButton(
+              onPressed: () async {
+                try {
+                  await _flutterKioskAndroidPlugin.disallowInstallingApplications();
+                  _isInstallingApplicationsAllowed = await _flutterKioskAndroidPlugin.isInstallingApplicationsAllowed();
+                  setState(() {});
+                } on PlatformException {}
+              },
+              child: Text( 'Disallow installing applications'),
+            ),
+            Text("isInstallingApplicationsAllowed: ${_isInstallingApplicationsAllowed}"),
           ],
         )),
       ),

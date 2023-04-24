@@ -7,6 +7,7 @@ import android.app.admin.DevicePolicyManager
 import android.content.ComponentName
 import android.content.Context
 import android.os.Build
+import android.os.UserManager
 import androidx.annotation.NonNull
 import androidx.core.content.ContextCompat.getSystemService
 
@@ -17,6 +18,7 @@ import io.flutter.plugin.common.MethodCall
 import io.flutter.plugin.common.MethodChannel
 import io.flutter.plugin.common.MethodChannel.MethodCallHandler
 import io.flutter.plugin.common.MethodChannel.Result
+import java.util.logging.Logger
 
 /** FlutterKioskAndroidPlugin */
 class FlutterKioskAndroidPlugin : FlutterPlugin, MethodCallHandler, ActivityAware,
@@ -28,6 +30,7 @@ class FlutterKioskAndroidPlugin : FlutterPlugin, MethodCallHandler, ActivityAwar
     private lateinit var channel: MethodChannel
     private lateinit var activity: Activity
     private lateinit var context: Context
+    private val logger = Logger.getLogger(this.javaClass.name)
 
     override fun onAttachedToEngine(@NonNull flutterPluginBinding: FlutterPlugin.FlutterPluginBinding) {
         channel = MethodChannel(flutterPluginBinding.binaryMessenger, "flutter_kiosk_android")
@@ -43,6 +46,9 @@ class FlutterKioskAndroidPlugin : FlutterPlugin, MethodCallHandler, ActivityAwar
             "startKioskMode" -> startKioskMode(result)
             "stopKioskMode" -> stopKioskMode(result)
             "isInKioskMode" -> isInKioskMode(result)
+            "allowInstallingApplications" -> allowInstallingApplications(result)
+            "disallowInstallingApplications" -> disallowInstallingApplications(result)
+            "isInstallingApplicationsAllowed" -> isInstallingApplicationsAllowed(result)
             else -> result.notImplemented()
         }
     }
@@ -133,5 +139,44 @@ class FlutterKioskAndroidPlugin : FlutterPlugin, MethodCallHandler, ActivityAwar
 
     private fun getAdminComponent(): ComponentName {
         return ComponentName(context.packageName, this::class.java.name)
+    }
+
+    private fun disallowInstallingApplications(result: Result) {
+        val dpm = activity.getSystemService(Context.DEVICE_POLICY_SERVICE) as DevicePolicyManager
+        val admin = getAdminComponent()
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+            dpm.addUserRestriction(admin, UserManager.DISALLOW_INSTALL_APPS)
+            logger.info("Disallowed install apps")
+            result.success(true)
+        } else {
+            result.success(false)
+        }
+
+    }
+
+    private fun allowInstallingApplications(result: Result) {
+        val dpm = activity.getSystemService(Context.DEVICE_POLICY_SERVICE) as DevicePolicyManager
+        val admin = getAdminComponent()
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+            dpm.clearUserRestriction(admin, UserManager.DISALLOW_INSTALL_APPS)
+            logger.info("Allowed install apps")
+            result.success(true)
+        } else {
+            result.success(false)
+        }
+
+    }
+
+    private fun isInstallingApplicationsAllowed(result: Result) {
+        val dpm = activity.getSystemService(Context.DEVICE_POLICY_SERVICE) as DevicePolicyManager
+        val admin = getAdminComponent()
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+            val bundle = dpm.getUserRestrictions(admin)
+            val value = bundle.getBoolean(UserManager.DISALLOW_INSTALL_APPS)
+            result.success(!value)
+        } else {
+            result.success(null)
+        }
+
     }
 }
